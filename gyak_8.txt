@@ -1,0 +1,7 @@
+db.collection.find({},
+{
+  firstName: 1,
+  lastname: 1,
+  user_id: 1,
+  _id: 0
+})
