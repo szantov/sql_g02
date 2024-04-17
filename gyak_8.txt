@@ -5,3 +5,12 @@ db.collection.find({},
   user_id: 1,
   _id: 0
 })
+
+db.collection.find({
+  firstName: "Grace"
+},
+{
+  email: 1,
+  password: 1,
+  _id: 0
+})
