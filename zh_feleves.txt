@@ -1,0 +1,64 @@
+zh féléves
+AZURE DATA STUDIO:
+
+SELECT sz.SZOBA_ID, COUNT(F.FOGLALAS_PK) AS 'Db'
+FROM Szoba sz LEFT JOIN Foglalas f ON sz.SZOBA_ID = f.SZOBA_FK
+GROUP BY sz.SZOBA_ID
+
+SELECT v.USERNEV, v.NEV, v.SZUL_DAT, v.SZAML_CIM, v.EMAIL
+FROM Szoba szo JOIN Foglalas f ON szo.SZOBA_ID = f.SZOBA_FK
+               JOIN Vendeg v ON f.UGYFEL_FK = v.USERNEV
+WHERE szo.FEROHELY = (
+    SELECT MAX(sz.FEROHELY) 
+    FROM Szoba sz
+) AND szo.KLIMAS = 'i'
+
+SELECT v.USERNEV AS 'Azonosító', 
+       v.NEV AS 'Név', 
+       v.SZUL_DAT AS 'Születési dátum', 
+       FIRST_VALUE(f.METTOL) OVER(PARTITION BY v.USERNEV ORDER BY f.METTOL) AS 'Első foglalás', 
+       LAST_VALUE(f.METTOL) OVER(PARTITION BY v.USERNEV ORDER BY f.METTOL) AS 'Utolsó foglalás'
+FROM Vendeg v JOIN Foglalas f ON f.UGYFEL_FK = v.USERNEV
+
+SELECT szh.SZALLAS_ID, sz.POTAGY, SUM(f.FELNOTT_SZAM + f.GYERMEK_SZAM) AS 'Fő'
+FROM Szallashely szh JOIN Szoba sz ON szh.SZALLAS_ID = sz.SZALLAS_FK
+                     JOIN Foglalas f ON f.SZOBA_FK = sz.SZOBA_ID
+GROUP BY ROLLUP(szh.SZALLAS_ID, sz.POTAGY)
+
+SELECT COUNT(DISTINCT Ferohely) AS 'Kulonbozo_ertekek_szama'
+FROM Szoba;
+
+SELECT 
+    MIN(Ferohely) AS 'Minimum',
+    MAX(Ferohely) AS 'Maximum',
+    AVG(Ferohely) AS 'Átlag'
+FROM Szoba;
+
+SELECT
+    (SUM(CASE WHEN Ferohely IS NULL THEN 1 ELSE 0 END) * 100.0 / COUNT(*)) AS 'Null_ertekek_szazalekosan',
+    (SUM(CASE WHEN Ferohely IS NOT NULL THEN 1 ELSE 0 END) * 100.0 / COUNT(*)) AS 'Not_Null_ertekek_szazalekosan'
+FROM Szoba;
+
+REDDIS:
+ HSET IRO:1 ID 1 nev "Toth Daniel" nemzetiseg "Magyar" 
+(integer) 3
+
+> HSET IRO:2 ID 2 nev "Szanto Laszlo" nemzetiseg "Magyar"
+(integer) 3
+
+> HSET KONYV:1 ID 1 cim "Varazslatos utazas" mufaj "Fiction" IRO_ID 1
+(integer) 4
+
+> HSET KONYV:2 ID 2 cim "Kalandra fel" mufaj "Fiction" IRO_ID 2
+(integer) 4
+
+Vagy
+
+> HSET KONYV:1:1 ID 1 cim "Varazslatos utazas" mufaj "Fiction" IRO_ID 1
+(integer) 4
+> HSET KONYV:2:2 ID 2 cim "Kalandra fel" mufaj "Fiction" IRO_ID 2field value
+
+NEO4J:
+MATCH (p:Person {name: "Tom Hanks"})-[:ACTED_IN]->(m:Movie)
+RETURN DISTINCT p.name AS szinesz
+ORDER BY szinesz;
